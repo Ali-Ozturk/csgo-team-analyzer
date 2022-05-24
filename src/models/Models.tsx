@@ -45,7 +45,7 @@ export interface Match {
         winner: string;
     }
     teams: {
-        fraction1: TeamFraction;
+        faction1: TeamFraction;
         faction2: TeamFraction;
     }
 }
@@ -53,6 +53,7 @@ export interface Match {
 export interface TeamFraction {
     nickname: string;
     players: PlayerFraction[];
+    team_id: string;
 }
 
 export interface PlayerFraction {

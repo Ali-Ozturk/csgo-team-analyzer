@@ -159,7 +159,7 @@ const TeamLayout: React.FC<{ team: Team | undefined }> = ({team}) => {
 
                 {(matchHistory && teamMatches) &&
                 <MatchesPlayedTogether playerCount={noRelevantPlayers} allMatches={matchHistory}
-                                       matches={teamMatches}/>}
+                                       matches={teamMatches} players={players}/>}
             </div>
         );
     }
