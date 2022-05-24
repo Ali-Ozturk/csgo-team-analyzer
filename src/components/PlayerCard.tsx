@@ -10,7 +10,7 @@ interface PropsFromParent {
 const PlayerCard: React.FC<PropsFromParent> = ({player}) => {
 
     return (
-        <Card style={{width: '14rem'}}>
+        <Card>
             <Card.Body>
                 <Card.Title>{player.nickname}</Card.Title>
                 <Card.Subtitle>Elo: {player.faceit_elo} (lv. {player.faceit_level})</Card.Subtitle>
@@ -20,7 +20,6 @@ const PlayerCard: React.FC<PropsFromParent> = ({player}) => {
                 </Card.Text>
                 <Card.Link href={player.faceit_url} target={"_blank"}>Faceit</Card.Link>
                 <Card.Link href="#">Steam</Card.Link>
-                <Card.Link style={{cursor: 'pointer'}} >Matches</Card.Link>
             </Card.Body>
         </Card>
     );

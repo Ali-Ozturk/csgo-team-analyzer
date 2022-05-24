@@ -1,10 +1,13 @@
 import React from 'react';
 import {Team} from "./models/Models";
-import {Syntax_METAL} from "./data/TeamData";
+import {Smage_METAL, Syntax_METAL} from "./data/TeamData";
 import TeamLayout from "./components/TeamLayout";
-import {Container} from "react-bootstrap";
+import {Button, Container, FloatingLabel, Form, InputGroup} from "react-bootstrap";
+import Loading from "./components/Loading";
+import {useGlobalState} from "./contexts/GlobalStateContext";
 
 function App() {
+    const {state, dispatch} = useGlobalState();
     const [team, setTeam] = React.useState<Team | undefined>(undefined);
     const [search, setSearch] = React.useState<string>("");
 
@@ -16,19 +19,55 @@ function App() {
             steam_ids: manipulated,
         }
 
-        console.log(manipulated);
         setTeam(tempTeam);
     }
 
     return (
-        <Container>
-            <label htmlFor="sids">Steam ids:</label>
-            <input type="text" id="sids" name="sids" onChange={(e) => setSearch(e.target.value)}/>
-            <button onClick={onSearch}>Search</button>
+        <Container className={'pt-4'}>
+            <div className={'d-flex align-items-center flex-column w-50 m-auto'}>
+                {!team && <>
+                    <InputGroup className="mb-3">
+                        <FloatingLabel controlId="steamidTextarea" label="Search by Steam64 ID (comma seperated)"
+                                       className={'col-10'}>
+                            <Form.Control
+                                as="textarea"
+                                placeholder="Search by Steam64 ID (comma seperated)"
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </FloatingLabel>
+                        <Button onClick={onSearch} variant="outline-success" id="button-addon2" className={'col-2'}>
+                            Search
+                        </Button>
+                    </InputGroup>
 
-            <button onClick={() => setTeam(Syntax_METAL)}>Team: Syntax</button>
 
-            {team && <TeamLayout team={team}/>}
+                    <div className={'w-100'}>
+                        <p className={''}><strong>Or choose from predefined sets</strong></p>
+
+                        <div className={'d-flex gap-5 justify-content-center'}>
+                            <div>
+                                <Button variant="outline-dark" onClick={() => setTeam(Syntax_METAL)}>Team: Syntax
+                                    ({Syntax_METAL.steam_ids.length})</Button>
+                            </div>
+                            <div>
+                                <Button variant="outline-dark" onClick={() => setTeam(Smage_METAL)}>
+                                    Team: Smage ({Smage_METAL.steam_ids.length})
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </>}
+            </div>
+
+            {team && <div className={'d-flex justify-content-center'}>
+                <Button variant={"outline-dark"} onClick={() => {
+                    setTeam(undefined);
+                }}>Choose different team</Button>
+            </div>}
+
+            <TeamLayout team={team}/>
+
+            <Loading loading={state.loading}/>
         </Container>
     );
 }

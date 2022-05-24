@@ -17,6 +17,5 @@ export const CountMapDistribution = (matches: MatchStatsResponseRoundStats[]) =>
         {map: 'de_vertigo', count: matches.filter((m) => m.Map === 'de_vertigo').length, wins: 0, loss: 0},
     ]
 
-    console.log(MapDistribution);
     return MapDistribution;
 }

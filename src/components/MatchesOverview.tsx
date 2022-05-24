@@ -6,7 +6,6 @@ const MatchesOverview: React.FC<{matches: Match[]}> = ({ matches}) => {
 
     useEffect(() => {
         console.log("Test");
-        FindUniqueMatchesInArray(matches);
     }, [])
 
     return (
