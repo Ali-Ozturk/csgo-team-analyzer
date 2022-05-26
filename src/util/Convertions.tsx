@@ -1,21 +1,60 @@
-import {MapStats, Match, MatchStatsResponseRoundStats} from "../models/Models";
+import {MapStats, Match, MatchStatsResponseRoundStats, PlayedMatchDetail} from "../models/Models";
 
 export const FindUniqueMatchesInArray = (allMatches: Match[]) => {
     // Ensure unique matches in case players have played in the same match
     return [...new Map(allMatches.map(item => [item['match_id'], item])).values()];
 }
 
-export const CountMapDistribution = (matches: MatchStatsResponseRoundStats[]) => {
+const CountWinsForMap = (map: string, list: PlayedMatchDetail[]) => {
+    return list.filter((match => match.round_stats.Map === map && match.isWinner)).length
+}
 
-    let MapDistribution: MapStats[] = [
-        {map: 'de_ancient', count: matches.filter((m) => m.Map === 'de_ancient').length, wins: 0, loss: 0},
-        {map: 'de_dust2', count: matches.filter((m) => m.Map === 'de_dust2').length, wins: 0, loss: 0},
-        {map: 'de_inferno', count: matches.filter((m) => m.Map === 'de_inferno').length, wins: 0, loss: 0},
-        {map: 'de_mirage', count: matches.filter((m) => m.Map === 'de_mirage').length, wins: 0, loss: 0},
-        {map: 'de_nuke', count: matches.filter((m) => m.Map === 'de_nuke').length, wins: 0, loss: 0},
-        {map: 'de_overpass', count: matches.filter((m) => m.Map === 'de_overpass').length, wins: 0, loss: 0},
-        {map: 'de_vertigo', count: matches.filter((m) => m.Map === 'de_vertigo').length, wins: 0, loss: 0},
+const CountLossForMap = (map: string, list: PlayedMatchDetail[]) => {
+    return list.filter((match => match.round_stats.Map === map && !match.isWinner)).length
+}
+
+const CountWinPercentage = (map: string, list: PlayedMatchDetail[]): number => {
+    const wins = CountWinsForMap(map, list);
+    const loss = CountLossForMap(map, list);
+    const totalMatches = wins + loss;
+
+    return parseFloat((wins / totalMatches * 100).toFixed(2)) ?? 0;
+}
+
+const GenerateMapStatsForGivenMap = (map: string, matches: PlayedMatchDetail[]): MapStats => {
+    return {
+        map,
+        count: matches.filter((m) => m.round_stats.Map === map).length,
+        wins: CountWinsForMap(map, matches),
+        loss: CountLossForMap(map, matches),
+        winPercentage: CountWinPercentage(map, matches)
+    }
+}
+
+export const CountMapDistribution = (matches: PlayedMatchDetail[]): MapStats[] => {
+
+    return [
+        GenerateMapStatsForGivenMap("de_ancient", matches),
+        GenerateMapStatsForGivenMap("de_dust2", matches),
+        GenerateMapStatsForGivenMap("de_inferno", matches),
+        GenerateMapStatsForGivenMap("de_mirage", matches),
+        GenerateMapStatsForGivenMap("de_nuke", matches),
+        GenerateMapStatsForGivenMap("de_overpass", matches),
+        GenerateMapStatsForGivenMap("de_vertigo", matches),
     ]
+}
 
-    return MapDistribution;
+
+export const CountUniqueStringsInArray = (list: string[]) => {
+    let counts: { [key: string]: number } = {};
+
+    for (let i = 0; i < list.length; i++) {
+        counts[list[i]] = 1 + (counts[list[i]] || 0);
+    }
+
+    // sort
+    const sortableArray = Object.entries(counts);
+    const sortedArray = sortableArray.sort(([, a], [, b]) => b - a);
+
+    return sortedArray;
 }

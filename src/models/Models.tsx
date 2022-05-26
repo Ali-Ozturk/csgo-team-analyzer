@@ -3,6 +3,7 @@ export interface MapStats {
     count: number;
     wins: number;
     loss: number;
+    winPercentage: number;
 }
 
 export interface PlayerDetails {
@@ -69,7 +70,7 @@ export interface PlayerFraction {
 export interface MatchStatsResponse {
     rounds: {
         round_stats: MatchStatsResponseRoundStats;
-        teams: { players: PlayerDetails , team_id: string }[]
+        teams: { players: PlayerDetails, team_id: string }[]
     }[]
 }
 
@@ -78,4 +79,37 @@ export interface MatchStatsResponseRoundStats {
     Rounds: string;
     Score: string;
     Winner: string;
+}
+
+
+export interface VoteHistoryEntity {
+    guid: string;
+    status: string;
+    random: boolean;
+    round: number;
+    selected_by: "faction1" | "faction2";
+}
+
+export interface VoteHistoryTicket {
+    entities: VoteHistoryEntity[];
+    entity_type: string;
+    vote_type: string;
+}
+
+export interface VoteHistoryPayload {
+    match_id: string;
+    tickets: VoteHistoryTicket[];
+}
+
+export interface VoteHistoryResponse {
+    payload: VoteHistoryPayload;
+}
+
+export type PlayedMatchDetail = {
+    match_id: string;
+    faceit_url: string;
+    date: Date;
+    round_stats: MatchStatsResponseRoundStats;
+    isWinner: boolean;
+    votesByTeam: VoteHistoryEntity[];
 }
