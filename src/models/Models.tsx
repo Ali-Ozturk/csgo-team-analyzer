@@ -20,6 +20,7 @@ export interface Team {
     name: string;
     steam_ids: string[] | number[];
     league?: string;
+    url?: string;
 }
 
 export interface TeamDetailed extends Team {

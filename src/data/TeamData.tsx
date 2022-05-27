@@ -25,3 +25,16 @@ export const Smage_METAL: Team = {
         "76561198038826695"
     ]
 }
+export const ObliviateElite_METAL: Team = {
+    name: 'Obliviate Elite',
+    league: 'Metal',
+    url: "https://steamcommunity.com/groups/obliviateesportelite",
+    steam_ids: [
+        "76561198058801866",
+        "76561198274417433",
+        "76561198042418698",
+        "76561198064228232",
+        "76561198140230131",
+        "76561198909192561"
+    ]
+}

@@ -1,6 +1,6 @@
 import React from 'react';
 import {Team} from "./models/Models";
-import {Smage_METAL, Syntax_METAL} from "./data/TeamData";
+import {ObliviateElite_METAL, Smage_METAL, Syntax_METAL} from "./data/TeamData";
 import TeamLayout from "./components/TeamLayout";
 import {Button, Container, FloatingLabel, Form, InputGroup} from "react-bootstrap";
 import Loading from "./components/Loading";
@@ -46,12 +46,17 @@ function App() {
 
                         <div className={'d-flex gap-5 justify-content-center'}>
                             <div>
-                                <Button variant="outline-dark" onClick={() => setTeam(Syntax_METAL)}>Team: Syntax
-                                    ({Syntax_METAL.steam_ids.length})</Button>
+                                <Button variant="outline-dark" onClick={() => setTeam(Syntax_METAL)}>
+                                    Team: {Syntax_METAL.name} ({Syntax_METAL.steam_ids.length})</Button>
                             </div>
                             <div>
                                 <Button variant="outline-dark" onClick={() => setTeam(Smage_METAL)}>
-                                    Team: Smage ({Smage_METAL.steam_ids.length})
+                                    Team: {Smage_METAL.name} ({Smage_METAL.steam_ids.length})
+                                </Button>
+                            </div>
+                            <div>
+                                <Button variant="outline-dark" onClick={() => setTeam(ObliviateElite_METAL)}>
+                                    Team: {ObliviateElite_METAL.name} ({ObliviateElite_METAL.steam_ids.length})
                                 </Button>
                             </div>
                         </div>
