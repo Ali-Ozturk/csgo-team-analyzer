@@ -38,3 +38,16 @@ export const ObliviateElite_METAL: Team = {
         "76561198909192561"
     ]
 }
+
+export const Vulture_METAL: Team = {
+    name: 'Team Vulture',
+    league: 'Metal',
+    steam_ids: [
+        "76561198075772339",
+        "76561198176005534",
+        "76561198201191395",
+        "76561198082225391",
+        "76561198228799424",
+        "76561198275132711"
+    ]
+}

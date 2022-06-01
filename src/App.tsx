@@ -1,6 +1,6 @@
 import React from 'react';
 import {Team} from "./models/Models";
-import {ObliviateElite_METAL, Smage_METAL, Syntax_METAL} from "./data/TeamData";
+import {ObliviateElite_METAL, Smage_METAL, Syntax_METAL, Vulture_METAL} from "./data/TeamData";
 import TeamLayout from "./components/TeamLayout";
 import {Button, Container, FloatingLabel, Form, InputGroup} from "react-bootstrap";
 import Loading from "./components/Loading";
@@ -57,6 +57,11 @@ function App() {
                             <div>
                                 <Button variant="outline-dark" onClick={() => setTeam(ObliviateElite_METAL)}>
                                     Team: {ObliviateElite_METAL.name} ({ObliviateElite_METAL.steam_ids.length})
+                                </Button>
+                            </div>
+                            <div>
+                                <Button variant="outline-dark" onClick={() => setTeam(Vulture_METAL)}>
+                                    Team: {Vulture_METAL.name} ({Vulture_METAL.steam_ids.length})
                                 </Button>
                             </div>
                         </div>
