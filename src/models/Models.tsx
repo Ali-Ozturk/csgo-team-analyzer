@@ -1,3 +1,5 @@
+import {calculateStats} from "../util/Convertions";
+
 export interface MapStats {
     map: string;
     count: number;
@@ -14,6 +16,7 @@ export interface PlayerDetails {
     steam_64: string;
     steam_id?: string;
     faceit_url: string;
+    stats?: CalculateStatsResult;
 }
 
 export interface Team {
@@ -113,4 +116,85 @@ export type PlayedMatchDetail = {
     round_stats: MatchStatsResponseRoundStats;
     isWinner: boolean;
     votesByTeam: VoteHistoryEntity[];
+}
+
+
+export interface FaceitStatsDTO_Stats {
+    ADR: string;
+    Team: string;
+    "Quadro Kills": string;
+    Region: string;
+    "Player Id": string;
+    Headshots: string;
+    Damage: string;
+    Deaths: string;
+    "Triple Kills": string;
+    "Flash Successes": string;
+    "Best Of": string;
+    Result: string;
+    "Sniper Kills": string;
+    "Game Mode": string;
+    "Utility Successes": string;
+    Assists: string;
+    Map: string;
+    MVPs: string;
+    "1v1Wins": string;
+    "Zeus Kills": string;
+    "Match Round": string;
+    "Entry Wins": string;
+    "1v2Count": string;
+    "Pistol Kills": string;
+    "Penta Kills": string;
+    "Updated At": string;
+    "Second Half Score": string;
+    "Headshots %": string;
+    "Enemies Flashed": string;
+    "Utility Enemies": string;
+    "Utility Count": string;
+    "First Kills": string;
+    "First Half Score": string;
+    "K/R Ratio": string;
+    Kills: string;
+    "Flash Count": string;
+    "Clutch Kills": string;
+    "Double Kills": string;
+    "1v2Wins": string;
+    Score: string;
+    Rounds: string;
+    Nickname: string;
+    "K/D Ratio": string;
+    "Entry Count": string;
+    "Match Id": string;
+    "Utility Damage": string;
+    "Created At": string;
+    "Knife Kills": string;
+    "Final Score": string;
+    "1v1Count": string;
+    "Overtime score": string;
+    "Competition Id": string;
+    Winner: string;
+    Game: string;
+}
+
+export interface FaceitStatsDTO_Item {
+    stats: FaceitStatsDTO_Stats;
+}
+
+export interface FaceitStatsDTO_DataStructure {
+    items: FaceitStatsDTO_Item[];
+}
+
+interface TopMap {
+    map: string;
+    count: number;
+}
+
+export interface CalculateStatsResult {
+    averageADR: string;
+    averageKills: string;
+    averageKD: string;
+    mapCount: {
+        [key: string]: number; // Map name as key, count of occurrences as value
+    };
+    top3Maps: TopMap[]; // Array of objects for the top 3 most played maps
 }

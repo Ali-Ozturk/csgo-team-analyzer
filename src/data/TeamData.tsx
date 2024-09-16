@@ -1,65 +1,79 @@
-import {Team} from "../models/Models";
+import { Team } from "../models/Models";
 
-export const Syntax_METAL: Team = {
-    name: 'Syntax',
-    league: 'Metal',
-    steam_ids: [
-        "76561198008037838",
-        "76561198035954051",
-        "76561198076018819",
-        "76561198442830271",
-        "76561197960777675",
-        "76561198331801905"
-    ]
-}
-
-export const Smage_METAL: Team = {
-    name: 'Smage',
-    league: 'Metal',
-    steam_ids: [
-        "76561198022034154",
-        "76561198017122515",
-        "76561198068964749",
-        "76561198014294629",
-        "76561198274934237",
-        "76561198038826695"
-    ]
-}
-export const ObliviateElite_METAL: Team = {
-    name: 'Obliviate Elite',
-    league: 'Metal',
-    url: "https://steamcommunity.com/groups/obliviateesportelite",
-    steam_ids: [
-        "76561198058801866",
-        "76561198274417433",
-        "76561198042418698",
-        "76561198064228232",
-        "76561198909192561",
-        "76561198165317692"
-    ]
-}
-
-export const Vulture_METAL: Team = {
-    name: 'Team Vulture',
-    league: 'Metal',
-    steam_ids: [
-        "76561198075772339",
-        "76561198176005534",
-        "76561198201191395",
-        "76561198082225391",
-        "76561198228799424",
-        "76561198275132711"
-    ]
-}
-
-export const FastForward_METAL: Team = {
-    name: 'Fast-Forward',
-    league: 'Metal',
-    steam_ids: [
-        "76561198015853156",
-        "76561198801753768",
-        "76561198037242111",
-        "76561198256233250",
-        "76561198060170136"
-    ]
-}
+export const TEAMS: Team[] = [
+    {
+        name: 'Wacki Dacki',
+        league: 'Powerligaen Div.D',
+        steam_ids: [
+            "rec0ildk",
+            "76561198035522203",
+            "76561198068964749",
+            "76561198013893850",
+            "76561198093359192"
+        ]
+    },
+    {
+        name: 'AaB Talent',
+        league: 'Powerligaen Div.D',
+        steam_ids: [
+            "raspe41",
+            "76561197998168703",
+            "76561198969999020",
+            "thenicecake",
+            "76561198844539113"
+        ]
+    },
+    {
+        name: 'Espergærde Esport Elite',
+        league: 'Powerligaen Div.D',
+        steam_ids: [
+            "76561198260248260",
+            "76561198877184229",
+            "Naaib",
+            "devexcs"
+        ]
+    },
+    {
+        name: 'Fluxile',
+        league: 'Powerligaen Div.D',
+        steam_ids: [
+            "76561197962329406",
+            "76561198991361815",
+            "76561198211381793",
+            "76561198256169013",
+            "76561199077735357"
+        ]
+    },
+    {
+        name: 'Egedal Esport',
+        league: 'Powerligaen Div.D',
+        steam_ids: [
+            "76561198117440842",
+            "76561198859380997",
+            "76561198003571494"
+        ]
+    },
+    {
+        name: 'ZipIt Esports',
+        league: 'Pracc.com match',
+        steam_ids: [
+            "andywrld_",
+            "reapcs2",
+            "Chees3_",
+            "realborek",
+            "76561199142913771"
+        ]
+    },
+    {
+        name: 'Ejby eSport Main',
+        league: 'Powerligaen Div 4.D',
+        steam_ids: [
+            "76561198411388622",
+            "76561198422662225",
+            "76561198023875549",
+            "76561198908622957",
+            "76561199073674977",
+            "76561198087989397"
+        ]
+    }
+];

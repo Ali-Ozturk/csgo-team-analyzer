@@ -1,7 +1,6 @@
-import React from 'react';
-import {Match, PlayerDetails} from "../models/Models";
+import React, {useEffect} from 'react';
+import {PlayerDetails} from "../models/Models";
 import {Card} from "react-bootstrap";
-import API from "../util/API";
 
 interface PropsFromParent {
     player: PlayerDetails
@@ -15,11 +14,28 @@ const PlayerCard: React.FC<PropsFromParent> = ({player}) => {
                 <Card.Title>{player.nickname}</Card.Title>
                 <Card.Subtitle>Elo: {player.faceit_elo} (lv. {player.faceit_level})</Card.Subtitle>
                 <Card.Text>
+                    {player.stats &&
+                        <>
+                            <p className={'mb-0 mt-2'}>Avg. Kills: {player.stats?.averageKills}</p>
+                            <p className={'mb-0'}>Avg. ADR: {player.stats?.averageADR}</p>
+                            <p className={'mb-0'}>Avg. KD: {player.stats?.averageKD}</p>
+                            <p className={'mb-0'}>3 most played maps:</p>
+                            <ul>
+                                {player.stats?.top3Maps.map(mapObj => (
+                                    <li key={mapObj.map}>
+                                        {mapObj.map}: {mapObj.count} times
+                                    </li>
+                                ))}
+                            </ul>
+
+                        </>
+                    }
                     {player.steam_64} <br/>
                     {player.steam_id}
                 </Card.Text>
-                <Card.Link href={player.faceit_url} target={"_blank"}>Faceit</Card.Link>
-                <Card.Link href="#">Steam</Card.Link>
+                <Card.Link target="_blank" href={player.faceit_url}>Faceit</Card.Link>
+                <Card.Link target="_blank"
+                           href={"https://steamcommunity.com/profiles/" + player.steam_64}>Steam</Card.Link>
             </Card.Body>
         </Card>
     );

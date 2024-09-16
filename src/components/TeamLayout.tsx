@@ -3,10 +3,11 @@ import {Match, PlayerDetails, Team} from "../models/Models";
 import API from "../util/API";
 import PlayerCard from "./PlayerCard";
 import {useGlobalState} from "../contexts/GlobalStateContext";
-import {FindUniqueMatchesInArray} from "../util/Convertions";
+import {calculateStats, FindUniqueMatchesInArray, isSteamID64} from "../util/Convertions";
 import MatchesPlayedTogether from "./MatchesPlayedTogether";
 import {Button, Form, FormControl, InputGroup} from "react-bootstrap";
 import axios from "axios";
+import ExtractTeamButton from "./ExtractTeam";
 
 const MATCHES_PER_PLAYER_SEARCH_AMOUNT = 100;
 
@@ -37,6 +38,7 @@ const TeamLayout: React.FC<{ team: Team | undefined }> = ({team}) => {
             let relevantMatches: Match[] = [];
             const uniqueMatches = FindUniqueMatchesInArray(list);
 
+
             uniqueMatches.forEach((match) => {
                 let matches = intersection(match.playing_players, players.map((p) => p.player_id));
 
@@ -49,6 +51,11 @@ const TeamLayout: React.FC<{ team: Team | undefined }> = ({team}) => {
             setTeamMatches(relevantMatches);
         }
 
+
+        const calculateAverageElo = (players: PlayerDetails[]) => {
+            const totalElo = players.reduce((acc, player) => acc + player.faceit_elo, 0);
+            return totalElo / players.length;
+        }
 
         const fetchMatchesForAllPlayers = () => {
             dispatch({type: 'setLoading', state: true});
@@ -74,35 +81,53 @@ const TeamLayout: React.FC<{ team: Team | undefined }> = ({team}) => {
                 });
         }
 
-        const fetchFaceitIds = (playerList: string[] | number[]) => {
-            let tempPlayerList: PlayerDetails[] = [];
+    const fetchFaceitIds = async (playerList: (string | number)[]) => {
+        let tempPlayerList: PlayerDetails[] = [];
+        dispatch({ type: 'setLoading', state: true });
 
-            for (const player of playerList) {
-                dispatch({type: 'setLoading', state: true});
-                API.FACEIT.getFaceitID(player)
-                    .then((resp) => {
-                        dispatch({type: 'setLoading', state: false});
-                        const playerDetails: PlayerDetails = {
-                            nickname: resp.data.nickname,
-                            faceit_elo: resp.data.games.csgo.faceit_elo,
-                            faceit_level: resp.data.games.csgo.skill_level,
-                            player_id: resp.data.player_id,
-                            steam_64: resp.data.games.csgo.game_player_id,
-                            steam_id: resp.data.platforms?.steam ?? 'Unknown',
-                            faceit_url: `https://www.faceit.com/en/players/${resp.data.nickname}`
-                        }
+        for (const player of playerList) {
+            let steamID = player.toString();
 
-                        tempPlayerList.push(playerDetails);
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    })
+            // Check if steamID is not a valid SteamID64 and fetch the correct one if needed
+            if (!isSteamID64(steamID)) {
+                try {
+                    const resp = await API.FACEIT.getSteamID64(steamID);
+                    steamID = resp.data.steamID;
+                } catch (err) {
+                    console.log(`Error fetching SteamID64 for player ${player}:`, err);
+                    continue; // Skip this player and move on to the next one in case of error
+                }
             }
 
-            setPlayers(tempPlayerList);
+            try {
+                const resp = await API.FACEIT.getFaceitID(steamID);
+                const faceit_id = resp.data.player_id;
+
+                const stats = await API.FACEIT.getFaceitStats(faceit_id);
+
+                const playerDetails: PlayerDetails = {
+                    nickname: resp.data.nickname,
+                    faceit_elo: resp.data.games.cs2.faceit_elo,
+                    faceit_level: resp.data.games.cs2.skill_level,
+                    player_id: resp.data.player_id,
+                    steam_64: resp.data.games.cs2.game_player_id,
+                    steam_id: resp.data.platforms?.steam ?? 'Unknown',
+                    faceit_url: `https://www.faceit.com/en/players/${resp.data.nickname}`,
+                    stats: calculateStats(stats.data),
+                };
+
+                tempPlayerList.push(playerDetails);
+            } catch (err) {
+                console.log(`Error fetching FaceitID for player ${steamID}:`, err);
+            }
         }
 
-        // Find Distinct between two arrays (https://stackoverflow.com/questions/15912538/get-the-unique-values-from-two-arrays-and-put-them-in-another-array)
+        setPlayers(tempPlayerList);
+        dispatch({ type: 'setLoading', state: false });
+    };
+
+
+    // Find Distinct between two arrays (https://stackoverflow.com/questions/15912538/get-the-unique-values-from-two-arrays-and-put-them-in-another-array)
         // var array3 = array1.filter(function(obj) { return array2.indexOf(obj) == -1; });
 
         if (!team) {
@@ -115,6 +140,8 @@ const TeamLayout: React.FC<{ team: Team | undefined }> = ({team}) => {
                 <div className={'d-flex gap-2'}>
                     {team.league && <span className="badge bg-danger">Players: {team.steam_ids.length}</span>}
                     {team.league && <span className="badge bg-info">League: {team.league}</span>}
+                    {players.length > 0 && <span className="badge bg-primary">Average Elo: {calculateAverageElo(players)}</span>}
+                    {team && <ExtractTeamButton steamIds={team.steam_ids} />}
                 </div>
 
                 <div className={'row gy-3 py-3'}>
@@ -146,20 +173,20 @@ const TeamLayout: React.FC<{ team: Team | undefined }> = ({team}) => {
 
 
                 {false &&
-                <>
-                    <button onClick={() => dispatch({type: 'setLoading', state: !state.loading})}>Loading test</button>
-                    <button onClick={() => fetchMatchesForAllPlayers()}>(2) Test match history</button>
-                    <button onClick={() => {
-                        // findRelevantMatches()
-                        console.log(teamMatches);
-                    }}>(3) Find relevant matches
-                    </button>
-                </>
+                    <>
+                        <button onClick={() => dispatch({type: 'setLoading', state: !state.loading})}>Loading test</button>
+                        <button onClick={() => fetchMatchesForAllPlayers()}>(2) Test match history</button>
+                        <button onClick={() => {
+                            // findRelevantMatches()
+                            console.log(teamMatches);
+                        }}>(3) Find relevant matches
+                        </button>
+                    </>
                 }
 
                 {(matchHistory && teamMatches) &&
-                <MatchesPlayedTogether playerCount={noRelevantPlayers} allMatches={matchHistory}
-                                       matches={teamMatches} players={players}/>}
+                    <MatchesPlayedTogether playerCount={noRelevantPlayers} allMatches={matchHistory}
+                                           matches={teamMatches} players={players}/>}
             </div>
         );
     }
