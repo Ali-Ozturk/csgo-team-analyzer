@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {PlayerDetails} from "../models/Models";
 import {Card} from "react-bootstrap";
 
@@ -31,7 +31,7 @@ const PlayerCard: React.FC<PropsFromParent> = ({player}) => {
                             </ul>
                             <p className={'mb-0'}>Lifetime:</p>
                             <ul>
-                                {player.lifetimeMapDistribution?.map(map => (
+                                {player.lifetimeMapDistribution?.slice(0, 8).map(map => (
                                     <li key={map.map}>
                                         {map.map}: {map.played} ({map.wins} | {map.loss}) {map.pctDistribution.toFixed(0)}%
                                     </li>

@@ -1,11 +1,12 @@
 import {
-    LifetimeMapDistribution,
-    CalculateStatsResult, FaceitLifetimeStatsDTO,
+    CalculateStatsResult,
+    FaceitLifetimeStatsDTO,
     FaceitStatsDTO_DataStructure,
+    LifetimeMapDistribution,
     MapStats,
     Match,
-    MatchStatsResponseRoundStats,
-    PlayedMatchDetail
+    PlayedMatchDetail,
+    PlayerDetails
 } from "../models/Models";
 
 export const FindUniqueMatchesInArray = (allMatches: Match[]) => {
@@ -78,7 +79,7 @@ export const isSteamID64 = (input: string) => {
 export const extractSteamIDs = (inputString: string) => {
     const steamID64Pattern = /^[0-9]{17}$/;
     const lines = inputString.split('\n'); // Split the input into lines
-    const steamIDs : string[] = [];
+    const steamIDs: string[] = [];
 
     lines.forEach(line => {
         const words = line.split(/\s+/); // Split the line into words based on whitespace
@@ -96,7 +97,7 @@ export const calculateStats = (data: FaceitStatsDTO_DataStructure): CalculateSta
     let totalADR = 0;
     let totalKills = 0;
     let totalKD = 0;
-    let mapCount: { [map: string]: number} = {};
+    let mapCount: { [map: string]: number } = {};
     let matchCount = data.items.length;
 
     data.items.forEach((item: any) => {
@@ -120,7 +121,7 @@ export const calculateStats = (data: FaceitStatsDTO_DataStructure): CalculateSta
     const top3Maps = Object.entries(mapCount)
         .sort((a, b) => b[1] - a[1]) // Sort by count (descending order)
         .slice(0, 3)                  // Take the top 3 maps
-        .map(([map, count]) => ({ map, count })); // Convert to { map, count } objects
+        .map(([map, count]) => ({map, count})); // Convert to { map, count } objects
 
     // Calculate averages
     const averageADR = totalADR / matchCount;
@@ -158,3 +159,34 @@ export const calculateLifetimeMapDistribution = (data: FaceitLifetimeStatsDTO): 
 
     return tempMapDistribution;
 };
+
+export const aggregateMapDistributions = (players: PlayerDetails[]): Record<string, number> => {
+    const mapDistributionTotals: Record<string, number> = {};
+
+    // Aggregate the pctDistribution for each map
+    players.forEach(player => {
+        if (player.lifetimeMapDistribution) {
+            player.lifetimeMapDistribution.forEach(mapDistribution => {
+                const map = mapDistribution.map;
+                const pctDistribution = mapDistribution.pctDistribution;
+
+                if (!mapDistributionTotals[map]) {
+                    mapDistributionTotals[map] = 0;
+                }
+
+                mapDistributionTotals[map] += pctDistribution;
+            });
+        }
+    });
+
+    // Sort the map distribution totals by pctDistribution in descending order
+    const sortedMapDistributionTotals = Object.entries(mapDistributionTotals)
+        .sort(([, pctA], [, pctB]) => pctB - pctA) // Sort by percentage, descending
+        .reduce((acc, [map, pct]) => {
+            acc[map] = Math.round(pct); // Round to 0 decimal places
+            return acc;
+        }, {} as Record<string, number>);
+
+    return sortedMapDistributionTotals;
+};
+

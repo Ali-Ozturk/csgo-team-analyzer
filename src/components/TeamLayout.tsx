@@ -4,6 +4,7 @@ import API from "../util/API";
 import PlayerCard from "./PlayerCard";
 import {useGlobalState} from "../contexts/GlobalStateContext";
 import {
+    aggregateMapDistributions,
     calculateLifetimeMapDistribution,
     calculateStats,
     FindUniqueMatchesInArray,
@@ -86,62 +87,63 @@ const TeamLayout: React.FC<{ team: Team | undefined }> = ({team}) => {
                 });
         }
 
-    const fetchFaceitIds = async (playerList: (string | number)[]) => {
-        let tempPlayerList: PlayerDetails[] = [];
-        dispatch({ type: 'setLoading', state: true });
+        const fetchFaceitIds = async (playerList: (string | number)[]) => {
+            let tempPlayerList: PlayerDetails[] = [];
+            dispatch({type: 'setLoading', state: true});
 
-        for (const player of playerList) {
-            let steamID = player.toString();
+            for (const player of playerList) {
+                let steamID = player.toString();
 
-            // Check if steamID is not a valid SteamID64 and fetch the correct one if needed
-            if (!isSteamID64(steamID)) {
+                // Check if steamID is not a valid SteamID64 and fetch the correct one if needed
+                if (!isSteamID64(steamID)) {
+                    try {
+                        const resp = await API.FACEIT.getSteamID64(steamID);
+                        steamID = resp.data.steamID;
+                    } catch (err) {
+                        console.log(`Error fetching SteamID64 for player ${player}:`, err);
+                        continue; // Skip this player and move on to the next one in case of error
+                    }
+                }
+
                 try {
-                    const resp = await API.FACEIT.getSteamID64(steamID);
-                    steamID = resp.data.steamID;
+                    const resp = await API.FACEIT.getFaceitID(steamID);
+                    const faceit_id = resp.data.player_id;
+
+                    const stats = await API.FACEIT.getFaceitStats(faceit_id);
+                    const lifetimeStats = await API.FACEIT.getFaceitLifetimeStats(faceit_id);
+
+                    const playerDetails: PlayerDetails = {
+                        nickname: resp.data.nickname,
+                        faceit_elo: resp.data.games.cs2.faceit_elo,
+                        faceit_level: resp.data.games.cs2.skill_level,
+                        player_id: resp.data.player_id,
+                        steam_64: resp.data.games.cs2.game_player_id,
+                        steam_id: resp.data.platforms?.steam ?? 'Unknown',
+                        faceit_url: `https://www.faceit.com/en/players/${resp.data.nickname}`,
+                        stats: calculateStats(stats.data),
+                        lifetimeMapDistribution: calculateLifetimeMapDistribution(lifetimeStats.data)
+                    };
+
+                    console.log(playerDetails)
+
+                    tempPlayerList.push(playerDetails);
                 } catch (err) {
-                    console.log(`Error fetching SteamID64 for player ${player}:`, err);
-                    continue; // Skip this player and move on to the next one in case of error
+                    console.log(`Error fetching FaceitID for player ${steamID}:`, err);
                 }
             }
 
-            try {
-                const resp = await API.FACEIT.getFaceitID(steamID);
-                const faceit_id = resp.data.player_id;
+            setPlayers(tempPlayerList);
+            dispatch({type: 'setLoading', state: false});
+        };
 
-                const stats = await API.FACEIT.getFaceitStats(faceit_id);
-                const lifetimeStats = await API.FACEIT.getFaceitLifetimeStats(faceit_id);
-
-                const playerDetails: PlayerDetails = {
-                    nickname: resp.data.nickname,
-                    faceit_elo: resp.data.games.cs2.faceit_elo,
-                    faceit_level: resp.data.games.cs2.skill_level,
-                    player_id: resp.data.player_id,
-                    steam_64: resp.data.games.cs2.game_player_id,
-                    steam_id: resp.data.platforms?.steam ?? 'Unknown',
-                    faceit_url: `https://www.faceit.com/en/players/${resp.data.nickname}`,
-                    stats: calculateStats(stats.data),
-                    lifetimeMapDistribution: calculateLifetimeMapDistribution(lifetimeStats.data)
-                };
-
-                console.log(playerDetails)
-
-                tempPlayerList.push(playerDetails);
-            } catch (err) {
-                console.log(`Error fetching FaceitID for player ${steamID}:`, err);
-            }
-        }
-
-        setPlayers(tempPlayerList);
-        dispatch({ type: 'setLoading', state: false });
-    };
-
-
-    // Find Distinct between two arrays (https://stackoverflow.com/questions/15912538/get-the-unique-values-from-two-arrays-and-put-them-in-another-array)
+        // Find Distinct between two arrays (https://stackoverflow.com/questions/15912538/get-the-unique-values-from-two-arrays-and-put-them-in-another-array)
         // var array3 = array1.filter(function(obj) { return array2.indexOf(obj) == -1; });
 
         if (!team) {
             return null;
         }
+
+        const aggregatedResult = aggregateMapDistributions(players);
 
         return (
             <div className={'pt-4'}>
@@ -149,8 +151,9 @@ const TeamLayout: React.FC<{ team: Team | undefined }> = ({team}) => {
                 <div className={'d-flex gap-2'}>
                     {team.league && <span className="badge bg-danger">Players: {team.steam_ids.length}</span>}
                     {team.league && <span className="badge bg-info">League: {team.league}</span>}
-                    {players.length > 0 && <span className="badge bg-primary">Average Elo: {calculateAverageElo(players)}</span>}
-                    {team && <ExtractTeamButton steamIds={team.steam_ids} />}
+                    {players.length > 0 &&
+                        <span className="badge bg-primary">Average Elo: {calculateAverageElo(players)}</span>}
+                    {team && <ExtractTeamButton steamIds={team.steam_ids}/>}
                 </div>
 
                 <div className={'row gy-3 py-3'}>
@@ -158,6 +161,19 @@ const TeamLayout: React.FC<{ team: Team | undefined }> = ({team}) => {
                         return <div className={'col'} key={key}><PlayerCard player={player}/></div>
                     })}
                 </div>
+
+                {players.length > 0 && (
+                    <div className="row justify-content-center">
+                        {Object.entries(aggregatedResult).slice(0, 8).map(([map, pct], index) => (
+                            <div key={index} className="col-auto text-center mb-4">
+                                <div className="p-3 bg-light border rounded shadow-sm">
+                                    <p className="mb-1 text-uppercase font-weight-bold">{map}</p>
+                                    <p className="mb-0">{pct}%</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
 
                 <div className={(!showFetch ? 'd-none' : 'd-block')} style={{width: '15rem'}}>
                     <Form onSubmit={(e) => {
@@ -179,7 +195,6 @@ const TeamLayout: React.FC<{ team: Team | undefined }> = ({team}) => {
                         </InputGroup>
                     </Form>
                 </div>
-
 
                 {false &&
                     <>
