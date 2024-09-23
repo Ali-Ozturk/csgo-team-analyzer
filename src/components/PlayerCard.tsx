@@ -16,14 +16,24 @@ const PlayerCard: React.FC<PropsFromParent> = ({player}) => {
                 <Card.Text>
                     {player.stats &&
                         <>
-                            <p className={'mb-0 mt-2'}>Avg. Kills: {player.stats?.averageKills}</p>
-                            <p className={'mb-0'}>Avg. ADR: {player.stats?.averageADR}</p>
-                            <p className={'mb-0'}>Avg. KD: {player.stats?.averageKD}</p>
-                            <p className={'mb-0'}>3 most played maps:</p>
+                            {/**DEPRECATED - Not used because not giving any details
+                             <p className={'mb-0 mt-2'}>Avg. Kills: {player.stats?.averageKills}</p>
+                             <p className={'mb-0'}>Avg. ADR: {player.stats?.averageADR}</p>
+                             <p className={'mb-0'}>Avg. KD: {player.stats?.averageKD}</p>
+                             */}
+                            <p className={'mb-0'}>Last 20: 3 most played maps:</p>
                             <ul>
                                 {player.stats?.top3Maps.map(mapObj => (
                                     <li key={mapObj.map}>
                                         {mapObj.map}: {mapObj.count} times
+                                    </li>
+                                ))}
+                            </ul>
+                            <p className={'mb-0'}>Lifetime:</p>
+                            <ul>
+                                {player.lifetimeMapDistribution?.map(map => (
+                                    <li key={map.map}>
+                                        {map.map}: {map.played} ({map.wins} | {map.loss}) {map.pctDistribution.toFixed(0)}%
                                     </li>
                                 ))}
                             </ul>

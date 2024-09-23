@@ -1,5 +1,6 @@
 import {
-    CalculateStatsResult,
+    LifetimeMapDistribution,
+    CalculateStatsResult, FaceitLifetimeStatsDTO,
     FaceitStatsDTO_DataStructure,
     MapStats,
     Match,
@@ -134,3 +135,26 @@ export const calculateStats = (data: FaceitStatsDTO_DataStructure): CalculateSta
         top3Maps: top3Maps
     };
 }
+
+export const calculateLifetimeMapDistribution = (data: FaceitLifetimeStatsDTO): LifetimeMapDistribution[] => {
+    const tempMapDistribution: LifetimeMapDistribution[] = [];
+
+    // Calculate the total number of matches across all segments
+    const totalMatches = data.segments.reduce((total, segment) => total + Number(segment.stats.Matches), 0);
+
+    // Populate the tempMapDistribution array with the new field pctDistribution
+    data.segments.forEach(segment => {
+        const playedMatches = Number(segment.stats.Matches);
+        tempMapDistribution.push({
+            map: segment.label,
+            played: playedMatches,
+            wins: Number(segment.stats.Wins),
+            loss: playedMatches - Number(segment.stats.Wins),
+            pctDistribution: (playedMatches / totalMatches) * 100 // Percentage distribution
+        });
+    });
+
+    tempMapDistribution.sort((a, b) => b.played - a.played);
+
+    return tempMapDistribution;
+};

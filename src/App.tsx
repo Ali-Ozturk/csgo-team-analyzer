@@ -26,7 +26,10 @@ function App() {
 
     return (
         <Container className={'pt-4'}>
-            <div className="m-auto" style={{ maxWidth: '800px' }}>
+            <div className="m-auto" style={{
+                maxWidth: '100%',
+                ...(window.innerWidth < 576 ? { maxWidth: '800px' } : {})
+            }}>
                 <div className={'d-flex align-items-center flex-column'}>
                     {!team && <>
                         <Row className="mb-3 w-100">

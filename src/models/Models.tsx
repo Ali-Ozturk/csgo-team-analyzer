@@ -17,6 +17,7 @@ export interface PlayerDetails {
     steam_id?: string;
     faceit_url: string;
     stats?: CalculateStatsResult;
+    lifetimeMapDistribution?: LifetimeMapDistribution[];
 }
 
 export interface Team {
@@ -184,6 +185,19 @@ export interface FaceitStatsDTO_DataStructure {
     items: FaceitStatsDTO_Item[];
 }
 
+export interface FaceitLifetimeStatsDTO_segment {
+    img_regular: string;
+    label: string;
+    stats: {
+        "Wins": number;
+        "Matches": number;
+    }
+}
+export interface FaceitLifetimeStatsDTO {
+    lifetime: any;
+    segments: FaceitLifetimeStatsDTO_segment[]
+}
+
 interface TopMap {
     map: string;
     count: number;
@@ -197,4 +211,12 @@ export interface CalculateStatsResult {
         [key: string]: number; // Map name as key, count of occurrences as value
     };
     top3Maps: TopMap[]; // Array of objects for the top 3 most played maps
+}
+
+export interface LifetimeMapDistribution {
+    map: string;
+    played: number;
+    wins: number;
+    loss: number;
+    pctDistribution: number;
 }

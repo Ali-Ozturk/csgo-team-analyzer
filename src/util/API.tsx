@@ -1,5 +1,6 @@
 import axios from "axios";
 import {
+    FaceitLifetimeStatsDTO,
     FaceitStatsDTO_DataStructure,
     MatchResponsePaginated,
     MatchStatsResponse,
@@ -16,6 +17,9 @@ export default {
         getFaceitStats: (player_id: string | number) => {
             return axios.get<FaceitStatsDTO_DataStructure>(`https://open.faceit.com/data/v4/players/${player_id}/games/cs2/stats`)
         },
+        getFaceitLifetimeStats: (player_id: string | number) => {
+            return axios.get<FaceitLifetimeStatsDTO>(`https://open.faceit.com/data/v4/players/${player_id}/stats/cs2`)
+        },
         getFaceitID: (player: string | number) => {
             return axios.get('https://open.faceit.com/data/v4/players?game=cs2&game_player_id=' + player);
         },
@@ -26,7 +30,7 @@ export default {
             return await axios.get<MatchStatsResponse>(`https://open.faceit.com/data/v4/matches/${matchID}/stats`);
         },
         getMatchVoteHistory: async (matchID: string) => {
-            return await axios.get<VoteHistoryResponse>(`/democracy/v1/match/1-a15bf7c9-e014-413c-a3c2-b0e26d64186b/history`, {
+            return await axios.get<VoteHistoryResponse>(`/democracy/v1/match/${matchID}/history`, {
                 headers: {
                     'Authorization': '',
                 },

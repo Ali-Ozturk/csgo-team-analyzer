@@ -3,7 +3,12 @@ import {Match, PlayerDetails, Team} from "../models/Models";
 import API from "../util/API";
 import PlayerCard from "./PlayerCard";
 import {useGlobalState} from "../contexts/GlobalStateContext";
-import {calculateStats, FindUniqueMatchesInArray, isSteamID64} from "../util/Convertions";
+import {
+    calculateLifetimeMapDistribution,
+    calculateStats,
+    FindUniqueMatchesInArray,
+    isSteamID64
+} from "../util/Convertions";
 import MatchesPlayedTogether from "./MatchesPlayedTogether";
 import {Button, Form, FormControl, InputGroup} from "react-bootstrap";
 import axios from "axios";
@@ -104,6 +109,7 @@ const TeamLayout: React.FC<{ team: Team | undefined }> = ({team}) => {
                 const faceit_id = resp.data.player_id;
 
                 const stats = await API.FACEIT.getFaceitStats(faceit_id);
+                const lifetimeStats = await API.FACEIT.getFaceitLifetimeStats(faceit_id);
 
                 const playerDetails: PlayerDetails = {
                     nickname: resp.data.nickname,
@@ -114,7 +120,10 @@ const TeamLayout: React.FC<{ team: Team | undefined }> = ({team}) => {
                     steam_id: resp.data.platforms?.steam ?? 'Unknown',
                     faceit_url: `https://www.faceit.com/en/players/${resp.data.nickname}`,
                     stats: calculateStats(stats.data),
+                    lifetimeMapDistribution: calculateLifetimeMapDistribution(lifetimeStats.data)
                 };
+
+                console.log(playerDetails)
 
                 tempPlayerList.push(playerDetails);
             } catch (err) {
