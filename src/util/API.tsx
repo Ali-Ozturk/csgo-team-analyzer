@@ -1,7 +1,7 @@
 import axios from "axios";
 import {
     FaceitLifetimeStatsDTO,
-    FaceitStatsDTO_DataStructure,
+    FaceitStatsDTO_DataStructure, MatchDetailsDTO,
     MatchResponsePaginated,
     MatchStatsResponse,
     VoteHistoryResponse
@@ -28,6 +28,9 @@ export default {
         },
         getMatchStatistics: async (matchID: string) => {
             return await axios.get<MatchStatsResponse>(`https://open.faceit.com/data/v4/matches/${matchID}/stats`);
+        },
+        getMatchDetails: async (matchID: string) => {
+            return await axios.get<MatchDetailsDTO>(`https://open.faceit.com/data/v4/matches/${matchID}`);
         },
         getMatchVoteHistory: async (matchID: string) => {
             return await axios.get<VoteHistoryResponse>(`/democracy/v1/match/${matchID}/history`, {

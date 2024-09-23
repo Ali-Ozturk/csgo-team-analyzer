@@ -8,6 +8,8 @@ import {
     PlayedMatchDetail,
     PlayerDetails
 } from "../models/Models";
+import API from "./API";
+import {TEAMS} from "../data/TeamData";
 
 export const FindUniqueMatchesInArray = (allMatches: Match[]) => {
     // Ensure unique matches in case players have played in the same match
@@ -92,6 +94,42 @@ export const extractSteamIDs = (inputString: string) => {
 
     return steamIDs;
 }
+
+export const extractFaceitMatch = async (inputString: string) => {
+    const faceitMatchPattern = /^https:\/\/www\.faceit\.com\/en\/cs2\/room\/([^\/]+)$/;
+    const match = inputString.match(faceitMatchPattern);
+
+    if (match && match[1]) {
+        const matchID = match[1];
+        const matchStats = await API.FACEIT.getMatchDetails(matchID);
+
+        const TWD_STEAM_IDS = TEAMS.find(team => team.name === 'Wacki Dacki');
+
+        if (TWD_STEAM_IDS && Array.isArray(TWD_STEAM_IDS.steam_ids)) {
+            // Cast steam_ids to string[] explicitly, since you know it's a string array in this case
+            const steamIdsAsStrings = TWD_STEAM_IDS.steam_ids as string[];
+
+            const faction1ContainsSteamId = matchStats.data.teams.faction1.roster
+                .some((player: { game_player_id: string }) => steamIdsAsStrings.includes(player.game_player_id));
+
+            const faction2ContainsSteamId = matchStats.data.teams.faction2.roster
+                .some((player: { game_player_id: string }) => steamIdsAsStrings.includes(player.game_player_id));
+
+            if (faction1ContainsSteamId) {
+                return matchStats.data.teams.faction2.roster.map(player => player.game_player_id)
+            } else if (faction2ContainsSteamId) {
+                return matchStats.data.teams.faction1.roster.map(player => player.game_player_id)
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+
+    return null; // Return null if it's not a Faceit match URL
+};
 
 export const calculateStats = (data: FaceitStatsDTO_DataStructure): CalculateStatsResult => {
     let totalADR = 0;

@@ -220,3 +220,22 @@ export interface LifetimeMapDistribution {
     loss: number;
     pctDistribution: number;
 }
+
+export interface MatchDetailsDTO {
+    match_id: string;
+    teams: {
+        faction1: { roster: MatchDetailsDTO_Player[]; };
+        faction2: { roster: MatchDetailsDTO_Player[]; };
+    };
+}
+
+interface MatchDetailsDTO_Player {
+    player_id: string;
+    nickname: string;
+    avatar: string;
+    membership: string;
+    game_player_id: string;
+    game_player_name: string;
+    game_skill_level: number;
+    anticheat_required: boolean;
+}

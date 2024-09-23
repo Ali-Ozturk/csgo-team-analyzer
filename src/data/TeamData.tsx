@@ -5,7 +5,7 @@ export const TEAMS: Team[] = [
         name: 'Wacki Dacki',
         league: 'Powerligaen Div.D',
         steam_ids: [
-            "rec0ildk",
+            "76561198022034154",
             "76561198035522203",
             "76561198068964749",
             "76561198013893850",

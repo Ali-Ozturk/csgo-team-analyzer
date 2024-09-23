@@ -1,44 +1,56 @@
 import React from 'react';
-import { Team } from "./models/Models";
-import { TEAMS } from "./data/TeamData";
+import {Team} from "./models/Models";
+import {TEAMS} from "./data/TeamData";
 import TeamLayout from "./components/TeamLayout";
-import { Button, Container, FloatingLabel, Form, Row, Col } from "react-bootstrap";
+import {Button, Col, Container, FloatingLabel, Form, Row} from "react-bootstrap";
 import Loading from "./components/Loading";
-import { useGlobalState } from "./contexts/GlobalStateContext";
+import {useGlobalState} from "./contexts/GlobalStateContext";
 import styled from "styled-components";
-import { extractSteamIDs } from "./util/Convertions";
+import {extractFaceitMatch, extractSteamIDs} from "./util/Convertions";
 
 function App() {
-    const { state } = useGlobalState();
+    const {state} = useGlobalState();
     const [team, setTeam] = React.useState<Team | undefined>(undefined);
     const [search, setSearch] = React.useState<string>("");
 
-    const onSearch = () => {
-        const extractedIds = extractSteamIDs(search);
+    const onSearch = async () => {
+        const faceitMatchExtracted = await extractFaceitMatch(search);
 
-        const tempTeam: Team = {
-            name: 'Search results',
-            steam_ids: extractedIds,
-        };
+        if (faceitMatchExtracted) {
+            const tempTeam: Team = {
+                name: 'Faceit match',
+                steam_ids: faceitMatchExtracted, // No steam IDs when dealing with a match URL
+            };
 
-        setTeam(tempTeam);
+            setTeam(tempTeam);
+        } else {
+            const extractedIds = extractSteamIDs(search);
+
+            const tempTeam: Team = {
+                name: 'Search results',
+                steam_ids: extractedIds,
+            };
+
+            setTeam(tempTeam);
+        }
     };
 
     return (
         <Container className={'pt-4'}>
             <div className="m-auto" style={{
                 maxWidth: '100%',
-                ...(window.innerWidth < 576 ? { maxWidth: '800px' } : {})
+                ...(window.innerWidth < 576 ? {maxWidth: '800px'} : {})
             }}>
                 <div className={'d-flex align-items-center flex-column'}>
                     {!team && <>
                         <Row className="mb-3 w-100">
                             <Col xs={12} sm={9}>
-                                <FloatingLabel controlId="steamidTextarea" label="Multi-search by inserting Steam64 ID's">
+                                <FloatingLabel controlId="steamidTextarea"
+                                               label="Multi-search by inserting Steam64 ID's or Faceit match url">
                                     <Form.Control
                                         as="textarea"
                                         rows={1}
-                                        placeholder="Search by Steam64 ID (comma separated)"
+                                        placeholder="Search by Steam64 ID or Faceit match url"
                                         onChange={(e) => setSearch(e.target.value)}
                                     />
                                 </FloatingLabel>
@@ -56,7 +68,8 @@ function App() {
                             <Row>
                                 {TEAMS.map((team, key) => {
                                     return (
-                                        <Col xs={12} sm={6} md={4} lg={3} className="mb-3 d-flex align-items-stretch" key={key}>
+                                        <Col xs={12} sm={6} md={4} lg={3} className="mb-3 d-flex align-items-stretch"
+                                             key={key}>
                                             <StyledButton variant="outline-dark" onClick={() => setTeam(team)}>
                                                 {team.name} ({team.steam_ids.length})
                                             </StyledButton>
@@ -68,9 +81,9 @@ function App() {
                     </>}
                 </div>
 
-                <TeamLayout team={team} />
+                <TeamLayout team={team}/>
 
-                <Loading loading={state.loading} />
+                <Loading loading={state.loading}/>
             </div>
         </Container>
     );
