@@ -153,8 +153,16 @@ const TeamLayout: React.FC<{ team: Team | undefined }> = ({team}) => {
                     <span className="badge bg-danger">Players: {team.steam_ids.length}</span>
                     {team.league && <span className="badge bg-info">League: {team.league}</span>}
                     {players.length > 0 &&
-                        <span className="badge bg-primary">Average Elo: {Math.round(calculateAverageElo(players))}</span>}
-                    {team.power_team_id && <span className="badge bg-secondary">PowerStats</span>}
+                        <span
+                            className="badge bg-primary">Average Elo: {Math.round(calculateAverageElo(players))}</span>}{team.power_team_id && (
+                    <a
+                        href={`https://powerstats.dk/team/${team.power_team_id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        <span className="badge bg-secondary">PowerStats</span>
+                    </a>
+                )}
                     {team && <ExtractTeamButton steamIds={team.steam_ids}/>}
                 </div>
 
@@ -164,7 +172,7 @@ const TeamLayout: React.FC<{ team: Team | undefined }> = ({team}) => {
                     })}
                 </div>
 
-                <PowerStatsVetoStats vetoStats={team.power_veto_stats} />
+                <PowerStatsVetoStats vetoStats={team.power_veto_stats}/>
 
                 {players.length > 0 && (
                     <div className="row justify-content-center">

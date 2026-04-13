@@ -11,7 +11,7 @@ import {
     extractPowerStatsTeamId,
     extractSteamIdsFromPowerStatsPlayersResponse,
     getLatestPowerStatsSeason,
-    getPowerStatsPlayersByTeamId,
+    getPowerStatsPlayersByTeamId, getPowerStatsTeamByTeamIdAndSeason,
     getPowerStatsVetoStats
 } from "./util/powerstats";
 
@@ -27,8 +27,8 @@ function App() {
             if (powerStatsTeamId) {
                 const latestSeason = await getLatestPowerStatsSeason();
 
-                // Call both endpoints as requested
-                const [vetoStats, playersResponse] = await Promise.all([
+                const [teamDetails, vetoStats, playersResponse] = await Promise.all([
+                    getPowerStatsTeamByTeamIdAndSeason(powerStatsTeamId, latestSeason),
                     getPowerStatsVetoStats(powerStatsTeamId, latestSeason),
                     getPowerStatsPlayersByTeamId(powerStatsTeamId, latestSeason),
                 ]);
@@ -36,15 +36,13 @@ function App() {
                 const extractedIds = extractSteamIdsFromPowerStatsPlayersResponse(playersResponse);
 
                 const tempTeam: Team = {
-                    name: `PowerStats team (${powerStatsTeamId})`,
+                    name: teamDetails.teamName || `PowerStats team (${powerStatsTeamId})`,
                     steam_ids: extractedIds,
                     power_team_id: powerStatsTeamId,
                     power_veto_stats: vetoStats,
+                    league: teamDetails.division ?? undefined,
+                    url: `https://powerstats.dk/team/${powerStatsTeamId}?season=${latestSeason}`,
                 };
-
-                console.log("PowerStats latest season:", latestSeason);
-                console.log("PowerStats veto stats:", vetoStats);
-                console.log("PowerStats players response:", playersResponse);
 
                 setTeam(tempTeam);
                 return;

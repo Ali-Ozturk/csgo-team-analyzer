@@ -1,5 +1,18 @@
 // src/util/powerstats.ts
 
+export interface PowerStatsTeamDetails {
+    teamId: string;
+    teamName: string;
+    teamLogo?: string | null;
+    ownerId?: string | null;
+    season: number;
+    division?: string | null;
+    twitter?: string | null;
+    coachID?: string | null;
+    website?: string | null;
+    playsInLigaen?: boolean;
+}
+
 export const extractPowerStatsTeamId = (input: string): string | null => {
     const trimmed = input.trim();
 
@@ -26,10 +39,6 @@ export const getLatestPowerStatsSeason = async (): Promise<number> => {
 
     const data = await response.json();
 
-    // API might return:
-    // 31
-    // { season: 31 }
-    // { latestSeason: 31 }
     if (typeof data === 'number') {
         return data;
     }
@@ -50,7 +59,25 @@ export const getLatestPowerStatsSeason = async (): Promise<number> => {
     throw new Error('Could not parse latest PowerStats season from API response');
 };
 
-export const getPowerStatsVetoStats = async (teamId: string, season: number): Promise<any> => {
+export const getPowerStatsTeamByTeamIdAndSeason = async (
+    teamId: string,
+    season: number
+): Promise<PowerStatsTeamDetails> => {
+    const response = await fetch(
+        `https://api.powerstats.dk/PowerStats/api/Team/getTeamByTeamIdAndSeason?teamId=${teamId}&season=${season}`
+    );
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch PowerStats team details: ${response.status}`);
+    }
+
+    return response.json();
+};
+
+export const getPowerStatsVetoStats = async (
+    teamId: string,
+    season: number
+): Promise<any> => {
     const response = await fetch(
         `https://api.powerstats.dk/PowerStats/api/Match/getVetoStats?teamid=${teamId}&season=${season}`
     );
@@ -62,7 +89,10 @@ export const getPowerStatsVetoStats = async (teamId: string, season: number): Pr
     return response.json();
 };
 
-export const getPowerStatsPlayersByTeamId = async (teamId: string, season: number): Promise<any> => {
+export const getPowerStatsPlayersByTeamId = async (
+    teamId: string,
+    season: number
+): Promise<any> => {
     const response = await fetch(
         `https://api.powerstats.dk/PowerStats/api/PlayerStat/getPlayersByTeamId?teamid=${teamId}&season=${season}`
     );
