@@ -25,6 +25,17 @@ export interface Team {
     steam_ids: string[] | number[];
     league?: string;
     url?: string;
+    power_team_id?: string;
+    power_veto_stats?: PowerStatsVetoStat[];
+}
+
+export interface PowerStatsVetoStat {
+    mapName: string;
+    amountPicked: number;
+    amountBanned: number;
+    amountPlayed: number;
+    amountWon: number;
+    chosenCTPercentage: number;
 }
 
 export interface TeamDetailed extends Team {

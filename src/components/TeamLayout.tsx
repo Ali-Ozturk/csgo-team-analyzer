@@ -14,6 +14,7 @@ import MatchesPlayedTogether from "./MatchesPlayedTogether";
 import {Button, Form, FormControl, InputGroup} from "react-bootstrap";
 import axios from "axios";
 import ExtractTeamButton from "./ExtractTeam";
+import PowerStatsVetoStats from "./PowerStatsVetoStats";
 
 const MATCHES_PER_PLAYER_SEARCH_AMOUNT = 100;
 
@@ -148,11 +149,12 @@ const TeamLayout: React.FC<{ team: Team | undefined }> = ({team}) => {
         return (
             <div className={'pt-4'}>
                 <h2>Team {team.name}</h2>
-                <div className={'d-flex gap-2'}>
-                    {team.league && <span className="badge bg-danger">Players: {team.steam_ids.length}</span>}
+                <div className={'d-flex gap-2 flex-wrap'}>
+                    <span className="badge bg-danger">Players: {team.steam_ids.length}</span>
                     {team.league && <span className="badge bg-info">League: {team.league}</span>}
                     {players.length > 0 &&
-                        <span className="badge bg-primary">Average Elo: {calculateAverageElo(players)}</span>}
+                        <span className="badge bg-primary">Average Elo: {Math.round(calculateAverageElo(players))}</span>}
+                    {team.power_team_id && <span className="badge bg-secondary">PowerStats</span>}
                     {team && <ExtractTeamButton steamIds={team.steam_ids}/>}
                 </div>
 
@@ -162,8 +164,11 @@ const TeamLayout: React.FC<{ team: Team | undefined }> = ({team}) => {
                     })}
                 </div>
 
+                <PowerStatsVetoStats vetoStats={team.power_veto_stats} />
+
                 {players.length > 0 && (
                     <div className="row justify-content-center">
+                        <p>FaceIT map distribution</p>
                         {Object.entries(aggregatedResult).slice(0, 8).map(([map, pct], index) => (
                             <div key={index} className="col-auto text-center mb-4">
                                 <div className="p-3 bg-light border rounded shadow-sm">

@@ -1,7 +1,8 @@
 import axios from "axios";
 import {
     FaceitLifetimeStatsDTO,
-    FaceitStatsDTO_DataStructure, MatchDetailsDTO,
+    FaceitStatsDTO_DataStructure,
+    MatchDetailsDTO,
     MatchResponsePaginated,
     MatchStatsResponse,
     VoteHistoryResponse
@@ -15,7 +16,14 @@ export default {
             return axios.post('https://tradeit.gg/api/steam/v1/steams/id-finder', {id: customURL})
         },
         getFaceitStats: (player_id: string | number) => {
-            return axios.get<FaceitStatsDTO_DataStructure>(`https://open.faceit.com/data/v4/players/${player_id}/games/cs2/stats`)
+            const now = new Date();
+            const to = now.getTime();
+
+            const from = new Date();
+            from.setMonth(from.getMonth() - 2);
+            const fromMs = from.getTime();
+
+            return axios.get<FaceitStatsDTO_DataStructure>(`https://open.faceit.com/data/v4/players/${player_id}/games/cs2/stats?limit=100&from=${fromMs}&to=${to}`);
         },
         getFaceitLifetimeStats: (player_id: string | number) => {
             return axios.get<FaceitLifetimeStatsDTO>(`https://open.faceit.com/data/v4/players/${player_id}/stats/cs2`)

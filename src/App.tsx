@@ -7,6 +7,13 @@ import Loading from "./components/Loading";
 import {useGlobalState} from "./contexts/GlobalStateContext";
 import styled from "styled-components";
 import {extractFaceitMatch, extractSteamIDs} from "./util/Convertions";
+import {
+    extractPowerStatsTeamId,
+    extractSteamIdsFromPowerStatsPlayersResponse,
+    getLatestPowerStatsSeason,
+    getPowerStatsPlayersByTeamId,
+    getPowerStatsVetoStats
+} from "./util/powerstats";
 
 function App() {
     const {state} = useGlobalState();
@@ -14,24 +21,56 @@ function App() {
     const [search, setSearch] = React.useState<string>("");
 
     const onSearch = async () => {
-        const faceitMatchExtracted = await extractFaceitMatch(search);
+        try {
+            const powerStatsTeamId = extractPowerStatsTeamId(search);
 
-        if (faceitMatchExtracted) {
-            const tempTeam: Team = {
-                name: 'Faceit match',
-                steam_ids: faceitMatchExtracted, // No steam IDs when dealing with a match URL
-            };
+            if (powerStatsTeamId) {
+                const latestSeason = await getLatestPowerStatsSeason();
 
-            setTeam(tempTeam);
-        } else {
-            const extractedIds = extractSteamIDs(search);
+                // Call both endpoints as requested
+                const [vetoStats, playersResponse] = await Promise.all([
+                    getPowerStatsVetoStats(powerStatsTeamId, latestSeason),
+                    getPowerStatsPlayersByTeamId(powerStatsTeamId, latestSeason),
+                ]);
 
-            const tempTeam: Team = {
-                name: 'Search results',
-                steam_ids: extractedIds,
-            };
+                const extractedIds = extractSteamIdsFromPowerStatsPlayersResponse(playersResponse);
 
-            setTeam(tempTeam);
+                const tempTeam: Team = {
+                    name: `PowerStats team (${powerStatsTeamId})`,
+                    steam_ids: extractedIds,
+                    power_team_id: powerStatsTeamId,
+                    power_veto_stats: vetoStats,
+                };
+
+                console.log("PowerStats latest season:", latestSeason);
+                console.log("PowerStats veto stats:", vetoStats);
+                console.log("PowerStats players response:", playersResponse);
+
+                setTeam(tempTeam);
+                return;
+            }
+
+            const faceitMatchExtracted = await extractFaceitMatch(search);
+
+            if (faceitMatchExtracted) {
+                const tempTeam: Team = {
+                    name: 'Faceit match',
+                    steam_ids: faceitMatchExtracted,
+                };
+
+                setTeam(tempTeam);
+            } else {
+                const extractedIds = extractSteamIDs(search);
+
+                const tempTeam: Team = {
+                    name: 'Search results',
+                    steam_ids: extractedIds,
+                };
+
+                setTeam(tempTeam);
+            }
+        } catch (error) {
+            console.error("Search failed:", error);
         }
     };
 
@@ -45,12 +84,14 @@ function App() {
                     {!team && <>
                         <Row className="mb-3 w-100">
                             <Col xs={12} sm={9}>
-                                <FloatingLabel controlId="steamidTextarea"
-                                               label="Multi-search by inserting Steam64 ID's or Faceit match url">
+                                <FloatingLabel
+                                    controlId="steamidTextarea"
+                                    label="Search by Steam64 IDs, Faceit match URL, or PowerStats team URL"
+                                >
                                     <Form.Control
                                         as="textarea"
                                         rows={1}
-                                        placeholder="Search by Steam64 ID or Faceit match url"
+                                        placeholder="Steam64 IDs, Faceit match URL, or PowerStats team URL"
                                         onChange={(e) => setSearch(e.target.value)}
                                     />
                                 </FloatingLabel>
@@ -68,8 +109,14 @@ function App() {
                             <Row>
                                 {TEAMS.map((team, key) => {
                                     return (
-                                        <Col xs={12} sm={6} md={4} lg={3} className="mb-3 d-flex align-items-stretch"
-                                             key={key}>
+                                        <Col
+                                            xs={12}
+                                            sm={6}
+                                            md={4}
+                                            lg={3}
+                                            className="mb-3 d-flex align-items-stretch"
+                                            key={key}
+                                        >
                                             <StyledButton variant="outline-dark" onClick={() => setTeam(team)}>
                                                 {team.name} ({team.steam_ids.length})
                                             </StyledButton>
@@ -90,15 +137,15 @@ function App() {
 }
 
 const StyledButton = styled(Button)`
-  width: 100%;
-  min-height: 100px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+    width: 100%;
+    min-height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 `;
 
 export default App;

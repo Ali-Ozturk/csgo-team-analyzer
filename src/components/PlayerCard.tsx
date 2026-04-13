@@ -21,7 +21,8 @@ const PlayerCard: React.FC<PropsFromParent> = ({player}) => {
                              <p className={'mb-0'}>Avg. ADR: {player.stats?.averageADR}</p>
                              <p className={'mb-0'}>Avg. KD: {player.stats?.averageKD}</p>
                              */}
-                            <p className={'mb-0'}>Last 20: 3 most played maps:</p>
+                            <p className={'mb-0'}>Last 100 matches (2 months period)</p>
+                            <p>3 most played maps:</p>
                             <ul>
                                 {player.stats?.top3Maps.map(mapObj => (
                                     <li key={mapObj.map}>
@@ -29,15 +30,25 @@ const PlayerCard: React.FC<PropsFromParent> = ({player}) => {
                                     </li>
                                 ))}
                             </ul>
-                            <p className={'mb-0'}>Lifetime:</p>
+                            <p className={'mb-0'}>All maps played:</p>
                             <ul>
-                                {player.lifetimeMapDistribution?.slice(0, 8).map(map => (
-                                    <li key={map.map}>
-                                        {map.map}: {map.played} ({map.wins} | {map.loss}) {map.pctDistribution.toFixed(0)}%
-                                    </li>
-                                ))}
+                                {Object.entries(player.stats.mapCount)
+                                    .sort(([, a], [, b]) => b - a) // sort descending by count
+                                    .map(([mapName, count]) => (
+                                        <li key={mapName}>
+                                            {mapName}: {count}
+                                        </li>
+                                    ))}
                             </ul>
-
+                            {/** deprecated, not very informative because lifetime is long time
+                             <ul>
+                             {player.lifetimeMapDistribution?.slice(0, 8).map(map => (
+                             <li key={map.map}>
+                             {map.map}: {map.played} ({map.wins} | {map.loss}) {map.pctDistribution.toFixed(0)}%
+                             </li>
+                             ))}
+                             </ul>
+                             */}
                         </>
                     }
                     {player.steam_64} <br/>
