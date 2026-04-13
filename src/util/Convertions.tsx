@@ -78,22 +78,18 @@ export const isSteamID64 = (input: string) => {
     return steamID64Pattern.test(input);
 }
 
-export const extractSteamIDs = (inputString: string) => {
+export const extractSteamIDs = (inputString: string): string[] => {
     const steamID64Pattern = /^[0-9]{17}$/;
-    const lines = inputString.split('\n'); // Split the input into lines
-    const steamIDs: string[] = [];
 
-    lines.forEach(line => {
-        const words = line.split(/\s+/); // Split the line into words based on whitespace
-        words.forEach(word => {
-            if (steamID64Pattern.test(word)) {
-                steamIDs.push(word); // Add valid SteamID64 to the array
-            }
-        });
-    });
-
-    return steamIDs;
-}
+    return Array.from(
+        new Set(
+            inputString
+                .split(/[\s,\n\r;]+/)
+                .map((value) => value.trim())
+                .filter((value) => steamID64Pattern.test(value))
+        )
+    );
+};
 
 export const extractFaceitMatch = async (inputString: string) => {
     const faceitMatchPattern = /^https:\/\/www\.faceit\.com\/en\/cs2\/room\/([^\/]+)$/;
